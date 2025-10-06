@@ -38,4 +38,9 @@ public class TaskService {
         return tasks;
     }
 
+    //delete
+    public void deleteTask(Integer id) {
+        TaskRepository.deleteById(id);
+    }
+
 }
