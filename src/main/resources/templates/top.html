@@ -12,34 +12,64 @@
 <form th:action="@{/todo/new}" method="get">
     <button type="submit">新規タスク</button>
 </form>
+
+<!--絞り込み-->
+<form th:action="@{/todo}" method="get">
+
+    <label>期限：</label>
+    <input type="date" name="start" th:value="${start}"> ～
+    <input type="date" name="end" th:value="${end}">
+
+    <label>ステータス：</label>
+    <select name="status">
+        <option value="">全て</option>
+        <option value="1" th:selected="${status == 1}">未着手</option>
+        <option value="2" th:selected="${status == 2}">実行中</option>
+        <option value="3" th:selected="${status == 3}">ステイ中</option>
+        <option value="4" th:selected="${status == 4}">完了</option>
+    </select>
+
+    <label>内容：</label>
+    <input type="text" name="content" th:value="${content}">
+
+    <button type="submit">絞込</button>
+</form>
+
 <!-- タスク一覧 -->
 <table>
     <tr th:each="task : ${tasks}">
-        <input type="hidden" name="id" th:value="${task.id}"/>
         <td th:text="${task.content}"></td>
-        <td>
-            <select name="status">
-                <option value="1" th:selected="${task.status == 1}">未着手</option>
-                <option value="2" th:selected="${task.status == 2}">実行中</option>
-                <option value="3" th:selected="${task.status == 3}">ステイ中</option>
-                <option value="4" th:selected="${task.status == 4}">完了</option>
-            </select>
-        </td>
-        <td th:text="${#temporals.format(task.limitDate, 'yyyy/MM/dd')}"></td>
-        <td>
 
+            <!-- ステータス変更-->
+            <td>
+                <form th:action="@{/todo/updateStatus}" method="post">
+                    <input type="hidden" name="id" th:value="${task.id}" />
+                    <select name="status">
+                        <option value="1" th:selected="${task.status == 1}">未着手</option>
+                        <option value="2" th:selected="${task.status == 2}">実行中</option>
+                        <option value="3" th:selected="${task.status == 3}">ステイ中</option>
+                        <option value="4" th:selected="${task.status == 4}">完了</option>
+                    </select>
+                    <button type="submit">変更</button>
+                </form>
+            </td>
+
+            <!--期限-->
+            <td th:text="${#temporals.format(task.limitDate, 'yyyy/MM/dd')}"></td>
+
+            <!--編集ボタン-->
             <td class="edit-button">
                 <a th:href="@{/edit/{id}(id=${task.id})}">
                     <input type="button" value="編集">
                 </a>
             </td>
 
+            <!--削除ボタン-->
             <td class = "delete_button">
                 <form th:action="@{/delete/{id}(id=${task.id})}" th:method="delete">
                     <input type="submit" value="削除">
                 </form>
             </td>
-        </td>
     </tr>
 </table>
 </body>
