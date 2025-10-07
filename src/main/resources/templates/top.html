@@ -58,18 +58,20 @@
             <td th:text="${#temporals.format(task.limitDate, 'yyyy/MM/dd')}"></td>
 
             <!--編集ボタン-->
-            <td class="edit-button">
-                <a th:href="@{/edit/{id}(id=${task.id})}">
-                    <input type="button" value="編集">
-                </a>
-            </td>
+        <td class="edit-button">
+            <form th:action="@{/todo/edit/{id}(id=${task.id})}" method="get">
+                <button type="submit">編集</button>
+            </form>
+        </td>
 
             <!--削除ボタン-->
-            <td class = "delete_button">
-                <form th:action="@{/delete/{id}(id=${task.id})}" th:method="delete">
-                    <input type="submit" value="削除">
-                </form>
-            </td>
+        <td class="delete_button">
+            <form th:action="@{/todo/delete/{id}(id=${task.id})}" method="post">
+                <input type="hidden" name="_method" value="delete">
+                <input type="submit" value="削除">
+            </form>
+        </td>
+
     </tr>
 </table>
 </body>

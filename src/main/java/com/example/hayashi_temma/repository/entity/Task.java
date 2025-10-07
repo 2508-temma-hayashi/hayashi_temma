@@ -28,9 +28,9 @@ public class Task {
     @Column(name = "limit_date", nullable = false)
     private LocalDateTime limitDate;
 
-    @Column(name = "created_date", insertable = false, updatable = false)
+    @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
-    @Column(name = "updated_date", insertable = true, updatable = false)
+    @Column(name = "updated_date", nullable = false)
     private LocalDateTime updatedDate;
 }

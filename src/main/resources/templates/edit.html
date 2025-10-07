@@ -2,32 +2,30 @@
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>タスク追加</title>
+    <title>タスク編集</title>
 </head>
 <body>
 
-<h1>タスク追加</h1>
+<h1>タスク編集</h1>
 
 <!-- エラーメッセージ -->
-<div th:if="${errorMessages != null}" >
+<div th:if="${errors != null}" >
     <li th:each="err : ${errorMessages}" th:text="${err}"></li>
 </div>
 
-<!-- タスク追加フォーム -->
-<form th:action="@{/todo/new}" th:object="${formModel}" method="post">
+<!-- 編集フォーム -->
+<form th:action="@{'/todo/edit/' + ${formModel.id}}" th:object="${formModel}" method="post">
+
     <label>タスク内容</label><br>
     <textarea th:field="*{content}" rows="3" cols="40"></textarea><br>
 
     <label>タスク期限</label><br>
-    <input type="date" th:field="*{limitDate}"><br>
+    <input type="date" th:field="*{limitDate}" /><br>
 
-    <button type="submit">追加</button>
+    <button type="submit">編集</button>
 </form>
-
 
 <a th:href="@{/todo}">戻る</a>
 
 </body>
 </html>
-
-

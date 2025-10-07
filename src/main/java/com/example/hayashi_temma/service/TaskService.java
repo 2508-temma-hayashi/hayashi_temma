@@ -31,7 +31,7 @@ public class TaskService {
         if(end != null){
             endDateTime = end.atTime(23, 59, 59);
         }else{
-            endDateTime = LocalDateTime.now();
+            endDateTime = LocalDateTime.of(2999, 12, 31, 23, 59);
         }
 
         if (!StringUtils.isBlank(content) && status != null) {
@@ -53,13 +53,12 @@ public class TaskService {
     private List<TaskForm> setTaskForm(List<Task> results){
         List<TaskForm> tasks = new ArrayList<>();
 
-        for (Task result : results) {
+        for (Task task : results) {
             TaskForm form = new TaskForm();
-            Task task = result;
             form.setId(task.getId());
             form.setContent(task.getContent());
             form.setStatus(task.getStatus());
-            form.setLimitDate(task.getLimitDate());
+            form.setLimitDate(task.getLimitDate().toLocalDate());
             tasks.add(form);
         }
         return tasks;
@@ -74,6 +73,40 @@ public class TaskService {
     public void updateStatus(Integer id, Integer status) {
         Task task = taskRepository.findById(id).orElseThrow();
         task.setStatus(status);
+        task.setUpdatedDate(LocalDateTime.now());
+        taskRepository.save(task);
+    }
+
+    //追加
+    public void saveTask(TaskForm form) {
+        Task task = new Task();
+        task.setContent(form.getContent());
+        task.setStatus(1);
+        task.setLimitDate(form.getLimitDate().atTime(23, 59, 59));
+        task.setCreatedDate(LocalDateTime.now());
+        task.setUpdatedDate(LocalDateTime.now());
+        taskRepository.save(task);
+    }
+
+    public TaskForm findById(Integer id) {
+        Task task = taskRepository.findById(id).orElse(null);
+        if (task == null) {
+            return null;
+        }
+
+        TaskForm form = new TaskForm();
+        form.setId(task.getId());
+        form.setContent(task.getContent());
+        form.setLimitDate(task.getLimitDate().toLocalDate());
+        form.setStatus(task.getStatus());
+        return form;
+    }
+
+    //タスク編集
+    public void updateTask(Integer id, TaskForm form) {
+        Task task = taskRepository.findById(id).orElseThrow();
+        task.setContent(form.getContent());
+        task.setLimitDate(form.getLimitDate().atTime(23, 59, 59));
         task.setUpdatedDate(LocalDateTime.now());
         taskRepository.save(task);
     }

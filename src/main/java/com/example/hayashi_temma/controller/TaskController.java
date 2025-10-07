@@ -1,6 +1,6 @@
 package com.example.hayashi_temma.controller;
 
-import ch.qos.logback.core.model.Model;
+import org.springframework.ui.Model;
 import com.example.hayashi_temma.controller.form.TaskForm;
 import com.example.hayashi_temma.service.TaskService;
 import io.micrometer.common.util.StringUtils;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -78,36 +79,84 @@ public class TaskController {
             mav.addObject("errorMessages", errorMessages);
         }
         session.removeAttribute("errorMessages");
-        session.removeAttribute("errorReportId");
         return mav;
     }
 
     //新規追加投稿機能
     @PostMapping("/new")
-    public ModelAndView addContent(@ModelAttribute("formModel") @Validated TaskForm taskForm, BindingResult result){
-        List<String> errorMessages = new ArrayList<>();
-        String content = taskForm.getContent();
-        LocalDateTime limitDate = taskForm.getLimitDate();
-        //入力チェック
-        if (StringUtils.isBlank(content)) {
-            errorMessages.add("タスクを入力してください");
-        }else if (content.length() > 140) {
-            errorMessages.add("タスクは140文字以内で入力してください");
-        }
+    public ModelAndView addContent(
+            @ModelAttribute("formModel") @Validated TaskForm taskForm,
+            BindingResult result) {
 
-        if (limitDate == null) {
-            errorMessages.add("期限を設定してください");
-        } else if (limitDate.isBefore(LocalDateTime.now())) {
-            errorMessages.add("無効な日付です");
-        }
+        //エラーメッセージ抽出
+        List<String> errorMessages = getErrorMessages(result);
 
-        if (!errorMessages.isEmpty()) {
+        if (result.hasErrors()) {
             session.setAttribute("errorMessages", errorMessages);
+            // エラー時のため
+            session.setAttribute("formModel", taskForm);
             return new ModelAndView("redirect:/todo/new");
         }
-        // 投稿をテーブルに格納
-        taskService.saveTask(TaskForm);
-        // rootへリダイレクト
+
+        //登録
+        taskService.saveTask(taskForm);
+
+        //一覧画面へ
         return new ModelAndView("redirect:/todo");
     }
+
+    //編集画面表示
+    @GetMapping("/edit/{id}")
+    public ModelAndView editTask(@PathVariable Integer id) {
+        ModelAndView mav = new ModelAndView();
+        List<String> errors = new ArrayList<>();
+
+        // IDチェック
+        if (id == null || id < 1) {
+            errors.add("不正なパラメータです");
+            session.setAttribute("errorMessages", errors);
+            return new ModelAndView("redirect:/todo");
+        }
+
+        // DBから取得
+        TaskForm taskForm = taskService.findById(id);
+        if (taskForm == null) {
+            errors.add("不正なパラメータです");
+            session.setAttribute("errorMessages", errors);
+            return new ModelAndView("redirect:/todo");
+        }
+
+        mav.setViewName("/edit");
+        mav.addObject("formModel", taskForm);
+        return mav;
+    }
+
+
+
+    //編集処理
+    @PostMapping("/edit/{id}")
+    public String updateTask(@PathVariable Integer id,
+                             @ModelAttribute("formModel") @Validated TaskForm taskForm,
+                             BindingResult result,
+                             Model model) {
+
+        if (result.hasErrors()) {
+            return "/edit"; // エラー時はそのまま再表示
+        }
+
+        //更新処理
+        taskService.updateTask(id, taskForm);
+        return "redirect:/todo";
+    }
+
+    public static List<String> getErrorMessages(BindingResult result) {
+        List<String> errorMessages = new ArrayList<>();
+        if (result.hasErrors()) {
+            for (FieldError error : result.getFieldErrors()) {
+                errorMessages.add(error.getDefaultMessage());
+            }
+        }
+        return errorMessages;
+    }
+
 }
