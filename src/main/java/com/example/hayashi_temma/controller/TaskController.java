@@ -74,11 +74,6 @@ public class TaskController {
         mav.setViewName("/new");
         // 準備した空のFormを保管
         mav.addObject("formModel", taskForm);
-        List<String> errorMessages = (List<String>) session.getAttribute("errorMessages");
-        if (errorMessages != null) {
-            mav.addObject("errorMessages", errorMessages);
-        }
-        session.removeAttribute("errorMessages");
         return mav;
     }
 
@@ -88,14 +83,14 @@ public class TaskController {
             @ModelAttribute("formModel") @Validated TaskForm taskForm,
             BindingResult result) {
 
-        //エラーメッセージ抽出
+        //エラーメッセージ
         List<String> errorMessages = getErrorMessages(result);
 
         if (result.hasErrors()) {
-            session.setAttribute("errorMessages", errorMessages);
-            // エラー時のため
-            session.setAttribute("formModel", taskForm);
-            return new ModelAndView("redirect:/todo/new");
+            ModelAndView mav = new ModelAndView("/new");
+            mav.addObject("errorMessages", errorMessages);
+            mav.addObject("formModel", taskForm); // 入力内容を保持
+            return mav;
         }
 
         //登録
@@ -141,7 +136,12 @@ public class TaskController {
                              Model model) {
 
         if (result.hasErrors()) {
-            return "/edit"; // エラー時はそのまま再表示
+            List<String> errorMessages = new ArrayList<>();
+            for (FieldError error : result.getFieldErrors()) {
+                errorMessages.add(error.getDefaultMessage());
+            }
+            model.addAttribute("errorMessages", errorMessages);
+            return "/edit";
         }
 
         //更新処理

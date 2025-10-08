@@ -9,7 +9,7 @@
 <h1>タスク編集</h1>
 
 <!-- エラーメッセージ -->
-<div th:if="${errors != null}" >
+<div th:if="${errorMessages != null}" >
     <li th:each="err : ${errorMessages}" th:text="${err}"></li>
 </div>
 
