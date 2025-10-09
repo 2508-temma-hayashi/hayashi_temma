@@ -11,8 +11,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +29,14 @@ public class TaskController {
 
     @Autowired
     private HttpSession session;
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ModelAndView handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        ModelAndView mav = new ModelAndView("/edit");
+        mav.addObject("errorMessages", List.of("不正なパラメータです"));
+        mav.addObject("formModel", new TaskForm()); // 空のフォームを渡す
+        return mav;
+    }
 
     @GetMapping
     public ModelAndView top(@RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate start,
