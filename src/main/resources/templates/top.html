@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <title>TODOリスト</title>
 </head>
 <body>
@@ -55,7 +56,9 @@
             </td>
 
             <!--期限-->
-            <td th:text="${#temporals.format(task.limitDate, 'yyyy/MM/dd')}"></td>
+        <td th:text="${#temporals.format(task.limitDate, 'yyyy/MM/dd')}"
+            th:classappend="${task.limitDate.isAfter(T(java.time.LocalDate).now()) ? 'tomorrow' : 'today'}">
+        </td>
 
             <!--編集ボタン-->
         <td class="edit-button">
